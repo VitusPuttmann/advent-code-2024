@@ -46,6 +46,8 @@ def check_distance(num_list):
 
 
 def solve_puzzle_02(filepath, dampened=False):
+    """ Solve the puzzles of day 2 by checking the order and distance
+        of the rows of numbers. """
     report_list = prep_report(filepath)
     acc_safe_tot = 0
     for report in report_list:
