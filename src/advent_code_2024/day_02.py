@@ -5,6 +5,7 @@
 import os
 
 
+""" Prepare filepath for reading in input. """
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_02_input.txt")
