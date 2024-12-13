@@ -14,7 +14,7 @@ filepath = os.path.join(parent_dir, "data", "day_06_input.txt")
 
 
 def create_grid(filepath):
-    """ Read a text-file and create a grid in the form of a list
+    """ Read a text file and create a grid in the form of a list
         of lists. """
     
     fin = open(filepath, 'r')
@@ -63,7 +63,7 @@ def in_grid(grid, point):
 
 
 def solve_puzzle_06_01(filepath):
-    """ Create a grid from a text-file, find the starting point, 
+    """ Create a grid from a text file, find the starting point, 
         calculate the path out of the grid, and calculate its length. """
     
     grid = create_grid(filepath)
@@ -105,7 +105,7 @@ def solve_puzzle_06_01(filepath):
 
 
 def solve_puzzle_06_02(filepath):
-    """ Create a grid from a text-file, find the starting point, 
+    """ Create a grid from a text file, find the starting point, 
         create altered grids, and calculate the number of grids
         that loop. """
     
