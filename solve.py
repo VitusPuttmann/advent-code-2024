@@ -13,8 +13,8 @@ Date:   26.03.2025
 import os
 
 
-def input_day():
-    """ Obtains and checks user input for selection of day. """
+def prompt_day() -> int:
+    """ Prompt user for day input and ensure it is a valid day (1-24). """
 
     print("For which day of the Advent of Code 2024 do you want the solution?")
     
@@ -26,24 +26,28 @@ def input_day():
             else:
                 print("Please enter a number between 1 and 24.")
         except ValueError:
-            print("Please enter a valid number.")
+            print("Invalid input. Please enter a number between 1 and 24.")
+
+
+def print_script(day: int):
+    """ Display the content of the script of the selected day. """
+
+    script_path = os.path.join(os.getcwd(), f"src", "advent_code_2024",
+                               f"day_{day:02d}.py")
+    
+    with open(script_path) as script:
+        print(script.read())
 
 
 if __name__ == '__main__':
-    """ Imports scripts with solutions for days, obtains user input, and
-        provides solutions, execution time and code as requested. """
+    """ Import scripts with solutions for days, obtain user input, and
+        provide solution, execution time and scripts as requested. """
     
     import src.advent_code_2024 as aoc
 
     while True:
-        choice_day = input_day()
-   
+        choice_day = prompt_day()
         function_name = f"main_day_{choice_day}"
-
-        if len(str(choice_day)) == 1:
-            choice_day_long = "0" + str(choice_day)
-        else:
-            choice_day_long = str(choice_day)
 
         try:
             main_function = getattr(aoc, function_name)
@@ -53,15 +57,10 @@ if __name__ == '__main__':
                                     "enter 'yes'.\n")
             
             if interest_script.lower() == 'yes':
-                script_path = (
-                    os.getcwd() + r"\src\advent_code_2024\day_" +
-                    choice_day_long + ".py"
-                )
-                with open(script_path, 'r') as script:
-                    print(script.read())
+                print_script(choice_day)
 
         except AttributeError:
-            print(f"The challenge has not been solved yet.")
+            print(f"The challenge of day {choice_day} has not been solved yet.")
 
         interest_day = input("If you want the solution to another challenge, "
                              "enter 'yes'\n")
