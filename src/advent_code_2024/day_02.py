@@ -93,11 +93,11 @@ def main():
     """ Execute the main function with the main input in two versions. """
     
     result_1, runtime_1 = solve_puzzle_02(filepath, dampened=False)
-    print(f"Solution of the first puzzle of day 2: {result_1}\n"
+    print(f"Solution to the first puzzle of day 2: {result_1}\n"
           f"Runtime: {runtime_1} seconds\n")
 
     result_2, runtime_2 = solve_puzzle_02(filepath, dampened=True)
-    print(f"Solution of the second puzzle of day 2: {result_2}\n"
+    print(f"Solution to the second puzzle of day 2: {result_2}\n"
           f"Runtime: {runtime_2} seconds\n")
 
 

@@ -75,11 +75,11 @@ def main():
     """ Execute the two main functions with the main input. """
 
     result_1, runtime_1 = solve_puzzle_01_01(filepath)
-    print(f"Solution of the first puzzle of day 1: {result_1}\n"
+    print(f"Solution to the first puzzle of day 1: {result_1}\n"
           f"Runtime: {runtime_1} seconds\n")
 
     result_2, runtime_2 = solve_puzzle_01_02(filepath)
-    print(f"Solution of the second puzzle of day 1: {result_2}\n"
+    print(f"Solution to the second puzzle of day 1: {result_2}\n"
           f"Runtime: {runtime_2} seconds\n")
 
 
