@@ -5,12 +5,24 @@ Advent of Code 2024 (https://adventofcode.com/).
 
 
 import os
+import time
 
 
 """ Prepare filepath for reading in input. """
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_02_input.txt")
+
+def calc_runtime(func):
+    """ Measure runtime of function. """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = round(end_time - start_time, 5)
+        return result, runtime
+    return wrapper
 
 
 def prep_report(filepath: str) -> list:
@@ -50,6 +62,7 @@ def check_distance(num_list: list) -> bool:
     return True
 
 
+@calc_runtime
 def solve_puzzle_02(filepath: str, dampened: bool = False) -> int:
     """ Check order and distance of lists and return number of safe lists. """
     
@@ -79,11 +92,13 @@ def solve_puzzle_02(filepath: str, dampened: bool = False) -> int:
 def main():
     """ Execute the main function with the main input in two versions. """
     
-    result_1 = solve_puzzle_02(filepath, dampened=False)
-    print(f"Solution of the first puzzle of day 2: {result_1}.")
+    result_1, runtime_1 = solve_puzzle_02(filepath, dampened=False)
+    print(f"Solution of the first puzzle of day 2: {result_1}\n"
+          f"Runtime: {runtime_1} seconds\n")
 
-    result_2 = solve_puzzle_02(filepath, dampened=True)
-    print(f"Solution of the second puzzle of day 2: {result_2}.")
+    result_2, runtime_2 = solve_puzzle_02(filepath, dampened=True)
+    print(f"Solution of the second puzzle of day 2: {result_2}\n"
+          f"Runtime: {runtime_2} seconds\n")
 
 
 if __name__ == '__main__':
