@@ -11,6 +11,7 @@ Date:   26.03.2025
 
 
 import os
+import importlib
 
 
 def prompt_day() -> int:
@@ -29,6 +30,19 @@ def prompt_day() -> int:
             print("Invalid input. Please enter a number between 1 and 24.")
 
 
+def load_day_function(day: int):
+    """ Dynamically load the function for the requested day from the
+    'src.advent_code_2024' module. """
+
+    try:
+        module_name = f"src.advent_code_2024.day_{day:02d}"
+        module = importlib.import_module(module_name)
+        return getattr(module, "main")
+    except (ModuleNotFoundError, AttributeError):
+        print(f"The challenge of day {day} has not been solved yet.")
+        return None
+
+
 def print_script(day: int):
     """ Display the content of the script of the selected day. """
 
@@ -43,14 +57,11 @@ if __name__ == '__main__':
     """ Import scripts with solutions for days, obtain user input, and
         provide solution, execution time and scripts as requested. """
     
-    import src.advent_code_2024 as aoc
-
     while True:
         choice_day = prompt_day()
-        function_name = f"main_day_{choice_day}"
+        main_function = load_day_function(choice_day)
 
-        try:
-            main_function = getattr(aoc, function_name)
+        if main_function:
             main_function()
 
             interest_script = input("If you want to see the code, "
@@ -58,9 +69,6 @@ if __name__ == '__main__':
             
             if interest_script.lower() == 'yes':
                 print_script(choice_day)
-
-        except AttributeError:
-            print(f"The challenge of day {choice_day} has not been solved yet.")
 
         interest_day = input("If you want the solution to another challenge, "
                              "enter 'yes'\n")
