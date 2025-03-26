@@ -1,6 +1,8 @@
-""" This module contains functions that solve the challenges of day 2
-    of the advent of code 2024 (https://adventofcode.com/).
 """
+This module contains functions that solve the challenges of day 2 of the
+Advent of Code 2024 (https://adventofcode.com/).
+"""
+
 
 import os
 
@@ -11,75 +13,67 @@ parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_02_input.txt")
 
 
-def prep_report(filepath):
-    """ Read a text file with numeric values creating a list
-        for each row and combine them into a list. """
-    
-    fin = open(filepath, 'r')
+def prep_report(filepath: str) -> list:
+    """ Read a text file with numeric values and create a list for each row
+    and combine them into a list. """
 
     report_list = []
 
-    for line in fin:
-        num_list = []
-        str_list = str.split(line, ' ')
-        for str_list_entry in str_list:
-            num_list.append(int(str_list_entry))
-        report_list.append(num_list)
-    
-    fin.close()
+    with open(filepath, 'r') as file_input:
+        for line in file_input:
+            num_list = list(map(int, line.split()))
+            report_list.append(num_list)
     
     return report_list
 
 
-def check_order(num_list):
+def check_order(num_list: list) -> bool:
     """ Check whether the numeric values in a list are ordered. """
 
-    check_res = False
-
-    if sorted(num_list, reverse = False) == num_list: check_res = True
-    if sorted(num_list, reverse = True) == num_list: check_res = True
+    if sorted(num_list, reverse=False) == num_list:
+        return True
+    if sorted(num_list, reverse=True) == num_list:
+        return True
     
-    return check_res
+    return False
 
 
-def check_distance(num_list):
-    """ Check whether adjacent values in a list are within a specific
-    distance. """
+def check_distance(num_list: list) -> bool:
+    """ Check whether adjacent values in a list have a distance between one
+    and three. """
 
-    check_res = False
-
-    acc_diff = 0
     for num_list_val in range(len(num_list)-1):
         abs_diff = abs(num_list[num_list_val] - num_list[num_list_val+1])
-        if abs_diff > 0 and abs_diff < 4: acc_diff += 1
+        if abs_diff == 0 or abs_diff > 3:
+            return False
     
-    if acc_diff == len(num_list)-1: check_res = True
-    
-    return check_res
+    return True
 
 
-def solve_puzzle_02(filepath, dampened=False):
-    """ Solve the puzzles of day 2 by checking the order and distance
-        of the rows of numbers. """
+def solve_puzzle_02(filepath: str, dampened: bool = False) -> int:
+    """ Check order and distance of lists and return number of safe lists. """
     
     report_list = prep_report(filepath)
 
-    acc_safe_tot = 0
+    safe_total = 0
+
     for report in report_list:
-        acc_safe_rep = 0
         order = check_order(report)
         distance = check_distance(report)
-        if order == True and distance == True: acc_safe_rep += 1
-        if dampened == True:
-            for rep_val in range(len(report)):
-                report_red = report.copy()
-                report_red.pop(rep_val)
+        if order and distance:
+            safe_total += 1
+            continue
+
+        if dampened:
+            for i in range(len(report)):
+                report_red = report[:i] + report[i+1:]
                 order_red = check_order(report_red)
                 distance_red = check_distance(report_red)
-                if order_red == True and distance_red == True: acc_safe_rep += 1
-        if acc_safe_rep > 0: acc_safe_tot += 1
-    
-    return acc_safe_tot
+                if order_red and distance_red:
+                    safe_total += 1
+                    break
+
+    return safe_total
 
 
 def main():
