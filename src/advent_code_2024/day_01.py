@@ -2,14 +2,29 @@
     of the advent of code 2024 (https://adventofcode.com/).
 """
 
+
 import re
 import os
+import time
+import inspect
 
 
 """ Prepare filepath for reading in input. """
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_01_input.txt")
+
+
+def calc_runtime(func):
+    """ Measure runtime of function. """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = round(end_time - start_time, 5)
+        return result, runtime
+    return wrapper
 
 
 def prep_lists(filepath):
@@ -46,6 +61,7 @@ def create_dict(val_list):
     return val_dict
 
 
+@calc_runtime
 def solve_puzzle_01_01(filepath):
     """ Solve the first puzzle of day 1 by calculating the distance
         between two lists. """
@@ -62,6 +78,7 @@ def solve_puzzle_01_01(filepath):
     return res_acc
 
 
+@calc_runtime
 def solve_puzzle_01_02(filepath):
     """ Solve the second puzzle of day 1 by calculating the
         similarity score of two lists. """
@@ -81,11 +98,13 @@ def solve_puzzle_01_02(filepath):
 def main():
     """ Execute the two main functions with the main input. """
 
-    result_1 = solve_puzzle_01_01(filepath)
-    print(f"Solution of the first puzzle of day 1: {result_1}.")
+    result_1, runtime_1 = solve_puzzle_01_01(filepath)
+    print(f"Solution of the first puzzle of day 1: {result_1}\n"
+          f"Runtime: {runtime_1} seconds\n")
 
-    result_2 = solve_puzzle_01_02(filepath)
-    print(f"Solution of the second puzzle of day 1: {result_2}.")
+    result_2, runtime_2 = solve_puzzle_01_02(filepath)
+    print(f"Solution of the second puzzle of day 1: {result_2}\n"
+          f"Runtime: {runtime_2} seconds\n")
 
 
 if __name__ == '__main__':
