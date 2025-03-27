@@ -1,7 +1,10 @@
-""" This module contains functions that solve the challenges of day 4
-    of the advent of code 2024 (https://adventofcode.com/).
+"""
+This module contains functions that solve the challenges of day 4
+    of the Advent of Code 2024 (https://adventofcode.com/).
 """
 
+
+import time
 import itertools
 import os
 
@@ -12,51 +15,52 @@ parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_04_input.txt")
 
 
-def create_array(filepath):
+""" Define all possible direction shifts. """
+DIRECTIONS = {
+    'tl': (-1, -1), 't': (-1, 0), 'tr': (-1, 1), 'r': (0, 1),
+    'br': (1, 1), 'b': (1, 0), 'bl': (1, -1), 'l': (0, -1)
+}
+
+
+def calc_runtime(func):
+    """ Measure runtime of function. """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = round(end_time - start_time, 5)
+        return result, runtime
+    return wrapper
+
+
+def create_array(filepath: str) -> list[list[str]]:
     """ Read in text file and create array as nested lists 
         with letters as cells. """
     
-    fin = open(filepath, 'r')
-    
-    letter_array = []
-    for line in fin:
-        row_text = line.strip()
-        row_list = list(row_text)
-        letter_array.append(row_list)
-    
-    fin.close()
+    with open(filepath, 'r') as file_input:
+        letter_array = []
+        for line in file_input:
+            row_text = line.strip()
+            row_list = list(row_text)
+            letter_array.append(row_list)
     
     return letter_array
 
 
-def shift_position(start, direction):
-    """ Define shifts in cell for all directions. """
+def shift_position(start: tuple, direction: str) -> tuple:
+    """ Return outcome of cell shift in specified direction. """
 
-    if direction == 'tl':
-        end = (start[0]-1, start[1]-1)
-    elif direction == 't':
-        end = (start[0]-1, start[1])
-    elif direction == 'tr':
-        end = (start[0]-1, start[1]+1)
-    elif direction == 'r':
-        end = (start[0], start[1]+1)
-    elif direction == 'br':
-        end = (start[0]+1, start[1]+1)
-    elif direction == 'b':
-        end = (start[0]+1, start[1])
-    elif direction == 'bl':
-        end = (start[0]+1, start[1]-1)
-    elif direction == 'l':
-        end = (start[0], start[1]-1)
-    else:
-        print("Invalid direction specification.")
-    
+    shift_y, shift_x = DIRECTIONS[direction]
+    end = (start[0]+shift_y, start[1]+shift_x)
     return end
 
 
-def search_letter(array, letter, center, position):
-    """ Search for a specific letter in a target cell relative to a
-        center cell. """
+def search_letter(
+        array: list[list[str]], letter: str, center: tuple, position: str
+    ) -> bool:
+    """ Search for a specific letter in a target cell relative to a center
+        cell. """
     
     target = shift_position(center, position)
 
@@ -68,16 +72,14 @@ def search_letter(array, letter, center, position):
     ):
         return False
 
-    if array[target[0]][target[1]] == letter:
-        return True
-    else:
-        return False
+    return array[target[0]][target[1]] == letter
 
 
-def solve_puzzle_04_01(filepath):
-    """ Create an array from a text file, take each cell of
-    the array in turn, search for the presence of XMAS in all
-    directions and return the total number of matches. """
+@calc_runtime
+def solve_puzzle_04_01(filepath: str) -> int:
+    """ Create an array from a text file, take each cell of the array in turn,
+        search for the presence of XMAS in all directions and return the total
+        number of matches. """
 
     array = create_array(filepath)
     
@@ -87,7 +89,7 @@ def solve_puzzle_04_01(filepath):
     directions = ['tl', 't', 'tr', 'r', 'br', 'b', 'bl', 'l']
     
     num_xmas = 0
-    for row, col, dir in itertools.product(
+    for row, col, direc in itertools.product(
         row_numbers, col_numbers, directions
     ):
         center_shift = (row, col)
@@ -95,26 +97,27 @@ def solve_puzzle_04_01(filepath):
         search_res = False
         
         if array[center_shift[0]][center_shift[1]] == 'X':
-            search_res = search_letter(array, 'M', center_shift, dir)
-            center_shift = shift_position(center_shift, dir)
+            search_res = search_letter(array, 'M', center_shift, direc)
+            center_shift = shift_position(center_shift, direc)
         
-        if search_res == True:
-            search_res = search_letter(array, 'A', center_shift, dir)
-            center_shift = shift_position(center_shift, dir)
+        if search_res:
+            search_res = search_letter(array, 'A', center_shift, direc)
+            center_shift = shift_position(center_shift, direc)
         
-        if search_res == True:
-            search_res = search_letter(array, 'S', center_shift, dir)
+        if search_res:
+            search_res = search_letter(array, 'S', center_shift, direc)
         
-        if search_res == True:
+        if search_res:
             num_xmas += 1
     
     return num_xmas
 
 
-def solve_puzzle_04_02(filepath):
-    """ Create an array from a text file, take each cell of
-    the array in turn, search for the presence of x-MAS in all
-    directions and return the total number of matches. """
+@calc_runtime
+def solve_puzzle_04_02(filepath: str) -> int:
+    """ Create an array from a text file, take each cell of the array in turn,
+        search for the presence of x-MAS in all directions and return the total
+        number of matches. """
 
     array = create_array(filepath)
 
@@ -174,11 +177,13 @@ def solve_puzzle_04_02(filepath):
 def main():
     """ Execute the main functions with the main input. """
     
-    result_1 = solve_puzzle_04_01(filepath)
-    print(f"Solution of the first puzzle of day 4: {result_1}.")
+    result_1, runtime_1 = solve_puzzle_04_01(filepath)
+    print(f"Solution to the first puzzle of day 4: {result_1}\n"
+          f"Runtime: {runtime_1} seconds\n")
 
-    result_2 = solve_puzzle_04_02(filepath)
-    print(f"Solution of the second puzzle of day 4: {result_2}.")
+    result_2, runtime_2 = solve_puzzle_04_02(filepath)
+    print(f"Solution to the second puzzle of day 4: {result_2}\n"
+          f"Runtime: {runtime_2} seconds\n")
 
 
 if __name__ == '__main__':
