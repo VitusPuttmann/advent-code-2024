@@ -1,10 +1,13 @@
-""" This module contains functions that solve the challenges of day 6
-    of the advent of code 2024 (https://adventofcode.com/).
 """
+This module contains functions that solve the challenges of day 6 of the
+Advent of Code 2024 (https://adventofcode.com/).
+"""
+
 
 import copy
 import itertools
 import os
+import time
 
 
 """ Prepare filepath for reading in input. """
@@ -13,180 +16,159 @@ parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_06_input.txt")
 
 
-def create_grid(filepath):
+class Walker():
+    """ Class to represent a 'guard' moving over a grid. """
+
+    def __init__(self, grid: list[list[str]], start: tuple):
+        self.directions = {
+            't': (-1, 0),
+            'r': (0, 1),
+            'b': (1, 0),
+            'l': (0, -1)
+        }
+        self.direction_cycle = itertools.cycle(self.directions.keys())
+        self.direction = next(self.direction_cycle)
+        self.grid = grid
+        self.grid_y = len(grid) - 1
+        self.grid_x = len(grid[0]) - 1
+        self.y_coord = start[0]
+        self.x_coord = start[1]
+
+    def make_step(self):
+        end_y = self.y_coord + self.directions[self.direction][0]
+        end_x = self.x_coord + self.directions[self.direction][1]
+
+        if end_y < 0 or end_y > self.grid_y:
+            return False
+        elif end_x < 0 or end_x > self.grid_x:
+            return False
+        elif self.grid[end_y][end_x] == '#':
+            self.direction = next(self.direction_cycle)
+            return self.make_step()
+        else:
+            self.y_coord = end_y
+            self.x_coord = end_x
+            return (end_y, end_x)
+
+
+def calc_runtime(func):
+    """ Measure runtime of function. """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = round(end_time - start_time, 5)
+        return result, runtime
+    return wrapper
+
+
+def create_grid(filepath: str) -> list[list[str]]:
     """ Read a text file and create a grid in the form of a list
         of lists. """
     
-    fin = open(filepath, 'r')
-
-    grid = []
-    for line in fin:
-        str_line = line.strip()
-        str_list = list(str_line)
-        grid.append(str_list)
+    with open(filepath, 'r') as file_input:
+        grid = []
+        for line in file_input:
+            str_line = line.strip()
+            str_list = list(str_line)
+            grid.append(str_list)
     
     return grid
 
 
-def make_step(start, direction):
-    """ Obtain coordinates of a target cell in a specified direction
-        from a start cell. """
-    
-    if direction == 't':
-        end = (start[0]-1, start[1])
-    elif direction == 'r':
-        end = (start[0], start[1]+1)
-    elif direction == 'b':
-        end = (start[0]+1, start[1])
-    elif direction == 'l':
-        end = (start[0], start[1]-1)
-    else:
-        print("Invalid direction specification.")
-    
-    return end
-
-
-def in_grid(grid, point):
-    """ Check whether a point is within a grid. """
-
-    in_grid = True
-
-    point_x = point[0]
-    point_y = point[1]
-
-    if point_x < 0 or point_x > (len(grid[0]) - 1):
-        in_grid = False
-    if point_y < 0 or point_y > (len(grid) - 1):
-        in_grid = False
-    
-    return in_grid
-
-
-def solve_puzzle_06_01(filepath):
-    """ Create a grid from a text file, find the starting point, 
-        calculate the path out of the grid, and calculate its length. """
+@calc_runtime
+def solve_puzzle_06_01(filepath: str) -> int:
+    """ Create a grid from a text file, find the starting point, instantiate 
+        'Walker' that follows the path out of the grid, and calculate its
+        length. """
     
     grid = create_grid(filepath)
 
-    start_point_x = None
     start_point_y = None
+    start_point_x = None
 
     for row in grid:
         if '^' in row:
-            start_point_x = grid.index(row)
-            start_point_y = row.index('^')
+            start_point_y = grid.index(row)
+            start_point_x = row.index('^')
+
     
-    center_shift = (start_point_x, start_point_y)
-    grid[start_point_x][start_point_y] = '.'
+    grid[start_point_y][start_point_x] = '.'
 
-    directions = ['t', 'r', 'b', 'l']
-    directions_cycle = itertools.cycle(directions)
-    current_direction = next(directions_cycle)
+    guard = Walker(grid, (start_point_y, start_point_x))
+    grid_points = [(start_point_y, start_point_x)]
+    
+    proceed = True
+    while proceed:
+        proceed = guard.make_step()
+        if proceed and (proceed not in grid_points):
+                grid_points.append(proceed)
 
-    field_list = []
-    max_steps = 1000
-    for round in range(max_steps):
-        field_list.append(center_shift)
-        target_cor = make_step(center_shift, current_direction)
-
-        if in_grid(grid, target_cor) == False:
-            break
-        
-        target_val = grid[target_cor[0]][target_cor[1]]
-        if target_val == '.':
-            center_shift = make_step(center_shift, current_direction)
-        elif target_val == '#':
-            current_direction = next(directions_cycle)
-            center_shift = make_step(center_shift, current_direction)
-
-    sum_steps = len(set(field_list))
-
-    return sum_steps
+    return len(grid_points)
 
 
-def solve_puzzle_06_02(filepath):
-    """ Create a grid from a text file, find the starting point, 
-        create altered grids, and calculate the number of grids
-        that loop. """
+@calc_runtime
+def solve_puzzle_06_02(filepath: str) -> int:
+    """ Create a grid from a text file, find the starting point, create altered
+        grids, initiate a 'Walker' for each grip, and calculate the number of
+        grids that loop. """
     
     grid = create_grid(filepath)
 
-    start_point_x = None
     start_point_y = None
+    start_point_x = None
+
     for row in grid:
         if '^' in row:
-            start_point_x = grid.index(row)
-            start_point_y = row.index('^')
+            start_point_y = grid.index(row)
+            start_point_x = row.index('^')
+
     
-    grid[start_point_x][start_point_y] = '.'
+    grid[start_point_y][start_point_x] = '.'
+
 
     row_numbers = range(len(grid))
     col_numbers = range(len(grid[0]))
     
-    grid_list = []
-    for x, y in itertools.product(row_numbers, col_numbers):
-        new_grid = copy.deepcopy(grid)
-        if (x, y) != (start_point_x, start_point_y):
-            new_grid[x][y] = '#'
-            grid_list.append(new_grid)
-
     sum_grids = 0
-    for grid_alt in grid_list:
-        center_shift = (start_point_x, start_point_y)
-
-        directions = ['t', 'r', 'b', 'l']
-        directions_cycle = itertools.cycle(directions)
-        current_direction = next(directions_cycle)
-
-        field_dict = {}
-
-        loop = False
-        while loop == False:
-            target_cor = make_step(center_shift, current_direction)
-            if in_grid(grid_alt, target_cor) == False:
-                break
-            
-            target_val = grid_alt[target_cor[0]][target_cor[1]]
-            if target_val == '.':
-                center_shift = make_step(center_shift, current_direction)
-            elif target_val == '#':
-                current_direction = next(directions_cycle)
-                target_cor = make_step(center_shift, current_direction)
-                target_val = grid_alt[target_cor[0]][target_cor[1]]
-                if target_val == '.':
-                    center_shift = make_step(center_shift, current_direction)
-                elif target_val == '#':
-                    current_direction = next(directions_cycle)
-                    target_cor = make_step(center_shift, current_direction)
-                    target_val = grid_alt[target_cor[0]][target_cor[1]]
-                    if target_val == '.':
-                        center_shift = make_step(center_shift, current_direction)
-                    else:
-                        print('-----')
-                        print('Problem when turning to cell:')
-                        print(center_shift)
-            
-            if center_shift not in field_dict:
-                field_dict[center_shift] = 1
-            else:
-                field_dict[center_shift] += 1
-
-            if field_dict[center_shift] > 4:
-                loop = True
-            
-        if loop == True:
-            sum_grids += 1
+    for y, x in itertools.product(row_numbers, col_numbers):
+        if (y, x) == (start_point_y, start_point_x):
+            continue
         
+        if grid[y][x] == '#':
+            continue
+        
+        new_grid = copy.deepcopy(grid)
+        new_grid[y][x] = '#'
+            
+        guard = Walker(new_grid, (start_point_y, start_point_x))
+        grid_pos = {(start_point_y, start_point_x, guard.direction)}
+    
+        proceed = True
+        while proceed:
+            proceed = guard.make_step()
+            if proceed:
+                pos = (proceed[0], proceed[1], guard.direction)
+                if pos in grid_pos:
+                    sum_grids += 1
+                    break
+                else:
+                    grid_pos.add(pos)
+
     return sum_grids
+
 
 def main():
     """ Execute the main functions with the main input. """
 
-    result_1 = solve_puzzle_06_01(filepath)
-    print(f"Solution of the first puzzle of day 6: {result_1}.")
+    result_1, runtime_1 = solve_puzzle_06_01(filepath)
+    print(f"Solution to the first puzzle of day 6: {result_1}\n"
+          f"Runtime: {runtime_1} seconds\n")
 
-    result_2 = solve_puzzle_06_02(filepath)
-    print(f"Solution of the second puzzle of day 6: {result_2}.")
+    result_2, runtime_2 = solve_puzzle_06_02(filepath)
+    print(f"Solution to the second puzzle of day 6: {result_2}\n"
+          f"Runtime: {runtime_2} seconds\n")
 
 
 if __name__ == '__main__':
