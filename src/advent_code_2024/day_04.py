@@ -1,6 +1,6 @@
 """
-This module contains functions that solve the challenges of day 4
-    of the Advent of Code 2024 (https://adventofcode.com/).
+This module contains functions that solve the challenges of day 4 of the
+Advent of Code 2024 (https://adventofcode.com/).
 """
 
 
