@@ -1,8 +1,12 @@
-""" This module contains functions that solve the challenges of day 9
-    of the advent of code 2024 (https://adventofcode.com/).
+"""
+This module contains functions that solve the challenges of day 9 of the
+Advent of Code 2024 (https://adventofcode.com/).
 """
 
+
 import os
+import time
+
 
 """ Prepare filepath for reading in input. """
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -10,13 +14,26 @@ parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_09_input.txt")
 
 
-def dedense(diskmap):
-    """ Transform a given diskmap in the form of a list of integers into a
-        list that contains the disk content in an extended form. """
+def calc_runtime(func):
+    """ Measure runtime of function. """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = round(end_time - start_time, 5)
+        return result, runtime
+    return wrapper
+
+
+def dedense(diskmap: list[int]) -> list[str]:
+    """ Transform a list of integers (i.e. diskmap) into an extended list of
+        integers following the rules for extension. """
 
     filemap = []
     counter = 0
     for element in diskmap:
+        # Identify equal indexes and calculate 'file number' based on index.
         if counter % 2 == 0:
             content = str(int(counter / 2))
         else:
@@ -30,16 +47,17 @@ def dedense(diskmap):
     return filemap
 
 
-def identify_first(filemap):
-    """ Take a filemap and return the index of the first '.'. """
+def identify_first_space(filemap: list[str]) -> int:
+    """ Take a list of strings (i.e. filemap) and return the index of the
+        first '.' (i.e. space). """
 
     index_space = filemap.index('.')
     return index_space
 
 
-def identify_last(filemap):
-    """ Take a filemap and return the content and index of the
-        last element. """
+def identify_last_element(filemap: list[str]) -> tuple:
+    """ Take a list of strings (i.e. filemap) and return the content and index
+        of the last string that is not a '.' (i.e. file number). """
 
     reversed_filemap = list(reversed(filemap))
 
@@ -53,34 +71,33 @@ def identify_last(filemap):
     return file_information
 
 
-def condense(filemap):
-    """ Take a filemap, replace spaces at the beginning with content from
-        the end until there is no space between content anymore, and return
-        the result as a list. """
+def condense(filemap: list[str]) -> list[str]:
+    """ Take a list of strings (i.e. filemap), successively replace the '.'
+        (i.e. spaces)' at the beginning with strings from the end until no space
+        is left between strings, and return the result as a list. """
     
     num_places = len(filemap) - 1
     num_spaces = filemap.count('.')
     test_index = num_places - num_spaces
     
     filemap_condensed = filemap.copy()
-    first_space = identify_first(filemap_condensed)
+    first_space = identify_first_space(filemap_condensed)
     while first_space <= test_index:
-        space_index = identify_first(filemap_condensed)
-        file_information = identify_last(filemap_condensed)
+        file_information = identify_last_element(filemap_condensed)
         file_content = file_information[0]
         file_index = file_information[1]
 
-        filemap_condensed[space_index] = file_content
+        filemap_condensed[first_space] = file_content
         filemap_condensed[file_index] = '.'
 
-        first_space = identify_first(filemap_condensed)
+        first_space = identify_first_space(filemap_condensed)
 
     return filemap_condensed
 
 
-def compile_spaces(filemap):
-    """ Take a filemap, calculate starting index and length of spaces,
-        and compile them into dictionary. """
+def compile_spaces(filemap: list[str]) -> dict:
+    """ Take a list of strings (i.e. filemap), calculate the starting index and
+        length of spaces, and compile them into dictionary. """
     
     spaces_with_length = []
     index_counter = 0
@@ -103,12 +120,12 @@ def compile_spaces(filemap):
     return spaces_with_length
 
 
-def condense_unfragmented(filemap):
-    """ Take a filemap, identify files and their legnth, identify spaces,
-        attempt to shift files to spaces starting from the end, and return
-        the result as a list. """
+def condense_unfragmented(filemap: list[str]) -> list[str]:
+    """ Take a list of strings (i.e. filemap), identify strings (i.e. files)
+        and their frequency, identify periods (i.e. spaces), attempt to shift
+        strings to spaces starting from the end, and return the result as a
+        list. """
 
-    # Create dictionary with file names and file lengths
     files_with_length = {}
     for slot in reversed(filemap):
         if slot == '.':
@@ -145,8 +162,8 @@ def condense_unfragmented(filemap):
     return filemap_defragmented
 
 
-def calculate_checksum(value_list):
-    """ Take a list of values, multiply the elements by their index and
+def calculate_checksum(value_list: list[str]) -> int:
+    """ Take a list of values, multiply the elements by their index, and
         calculate the sum of the multiplications. """
     
     checksum = 0
@@ -159,16 +176,16 @@ def calculate_checksum(value_list):
     return checksum
 
 
-def solve_puzzle_09(filepath, unfragmented=False):
-    """ Create a diskmap from a word file as a list, extend the list,
-        condense it, create a list including only the integers, and calculate
+@calc_runtime
+def solve_puzzle_09(filepath: str, unfragmented: bool = False) -> int:
+    """ Create a list of strings (i.e. diskmap) from a text file, extend the
+        list, condense it, create a list including only integers, and calculate
         the checksum. """
 
-    fin = open(filepath, 'r')
-
-    string_line = fin.readline().strip()
-    string_list = list(string_line)
-    diskmap = [int(e) for e in string_list]
+    with open(filepath, 'r') as file_input:
+        string_line = file_input.readline().strip()
+        string_list = list(string_line)
+        diskmap = [int(e) for e in string_list]
 
     filemap = dedense(diskmap)
 
@@ -186,11 +203,13 @@ def solve_puzzle_09(filepath, unfragmented=False):
 def main():
     """ Execute the main functions with the main input. """
 
-    result_1 = solve_puzzle_09(filepath, unfragmented=False)
-    print(f"Solution of the first puzzle of day 9: {result_1}.")
+    result_1, runtime_1 = solve_puzzle_09(filepath, unfragmented=False)
+    print(f"Solution to the first puzzle of day 9: {result_1}\n"
+          f"Runtime: {runtime_1} seconds\n")
 
-    result_2 = solve_puzzle_09(filepath, unfragmented=True)
-    print(f"Solution of the second puzzle of day 9: {result_2}.")
+    result_2, runtime_2 = solve_puzzle_09(filepath, unfragmented=True)
+    print(f"Solution to the second puzzle of day 9: {result_2}\n"
+          f"Runtime: {runtime_2} seconds\n")
 
 
 if __name__ == '__main__':
