@@ -1,9 +1,11 @@
-""" This module contains functions that solve the challenges of day 11
-    of the advent of code 2024 (https://adventofcode.com/).
+"""
+This module contains functions that solve the challenges of day 11 of the
+Advent of Code 2024 (https://adventofcode.com/).
 """
 
 
 import os
+import time
 
 
 """ Prepare filepath for reading in input. """
@@ -12,8 +14,20 @@ parent_dir = os.path.abspath(os.path.join(current_dir, os.pardir, os.pardir))
 filepath = os.path.join(parent_dir, "data", "day_11_input.txt")
 
 
+def calc_runtime(func):
+    """ Measure runtime of function. """
+
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        runtime = round(end_time - start_time, 5)
+        return result, runtime
+    return wrapper
+
+
 def create_list(filepath: str) -> list[int]:
-    """ Open file, read line and transfer content into list. """
+    """ Open a text file, read each line and store the content as a list. """
 
     with open(filepath, 'r') as input_file:
         line_string = input_file.readline().strip()
@@ -24,7 +38,7 @@ def create_list(filepath: str) -> list[int]:
 
 
 def transform_value(value: int) -> list[int]:
-    """ Apply one of three transformations to value."""
+    """ Apply one of three transformations to an input value."""
     
     if value == 0:
         return [1]
@@ -37,7 +51,7 @@ def transform_value(value: int) -> list[int]:
 
 
 def add_dictionary(memory: dict, value: int, steps: int):
-    """ Calculate dictionary entries for specific value and number
+    """ Calculate dictionary entries for a specific value and defined number
         of steps. """
 
     memory_entry = (value, steps) 
@@ -62,7 +76,7 @@ def add_dictionary(memory: dict, value: int, steps: int):
 
 
 def create_dictionary(total_steps: int) -> dict:
-    """ Create dictionary with entries for values from 1 to 10 for
+    """ Create a dictionary with entries for values from 1 to 10 for
         a given number of steps. """
 
     memory = {}
@@ -74,18 +88,19 @@ def create_dictionary(total_steps: int) -> dict:
     return memory
 
 
+@calc_runtime
 def solve_puzzle_11(filepath: str, steps: int = 25) -> int:
-    """ Create list from input file, create dictionary for given number
-        of steps, and calculate final number of values for transformation
-        of initial list. """
+    """ Create a list from an input file, create a dictionary for the given
+        number of steps, and calculate the final number of values for the
+        transformation of the initial list. """
 
-    input = create_list(filepath)
+    initial = create_list(filepath)
 
     memory = create_dictionary(steps)
     
     output = 0
 
-    for entry_input in input:
+    for entry_input in initial:
         process_value = 0
         process_list = []
         process_list.append([entry_input])
@@ -109,11 +124,13 @@ def solve_puzzle_11(filepath: str, steps: int = 25) -> int:
 def main():
     """ Execute the main function with the main input. """
 
-    result_1 = solve_puzzle_11(filepath)
-    print(f"Solution of the first puzzle of day 11: {result_1}.")
+    result_1, runtime_1 = solve_puzzle_11(filepath)
+    print(f"Solution to the first puzzle of day 11: {result_1}\n"
+          f"Runtime: {runtime_1} seconds\n")
 
-    result_2 = solve_puzzle_11(filepath, 75)
-    print(f"Solution of the second puzzle of day 11: {result_2}.")
+    result_2, runtime_2 = solve_puzzle_11(filepath, 75)
+    print(f"Solution to the second puzzle of day 11: {result_2}\n"
+          f"Runtime: {runtime_2} seconds\n")
 
 
 if __name__ == '__main__':
