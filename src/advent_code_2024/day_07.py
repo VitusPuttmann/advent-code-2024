@@ -45,14 +45,14 @@ def calculate_outcomes(int_list: list[int], concat: bool = False):
         of a list via addition or multiplication or via the addition of
         concatenation. """
 
-    if concat == False:
+    if not concat:
         outcomes_list = [int_list.pop(0)]
         for val in int_list:
             addition_list = [x + val for x in outcomes_list]
             multiplication_list = [x * val for x in outcomes_list]
             outcomes_list = addition_list + multiplication_list
     
-    if concat == True:
+    if concat:
         outcomes_list = [int_list.pop(0)]
         for val in int_list:
             addition_list = [x + val for x in outcomes_list]
